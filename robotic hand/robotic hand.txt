@@ -1,0 +1,94 @@
+#define BLYNK_PRINT Serial
+
+#include <WiFi.h>
+#include <BlynkSimpleEsp32.h>
+#include <ESP32Servo.h>
+
+char auth[] = "YOUR_BLYNK_AUTH_TOKEN";
+char ssid[] = "YOUR_WIFI_NAME";
+char pass[] = "YOUR_WIFI_PASSWORD";
+
+#define IN1 25
+#define IN2 26
+#define ENA 33
+
+#define SERVO1_PIN 13
+#define SERVO2_PIN 12
+#define SERVO3_PIN 14
+
+Servo servo1;
+Servo servo2;
+Servo servo3;
+
+void baseStop()
+{
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, LOW);
+}
+
+void baseLeft()
+{
+  digitalWrite(IN1, LOW);
+  digitalWrite(IN2, HIGH);
+}
+
+void baseRight()
+{
+  digitalWrite(IN1, HIGH);
+  digitalWrite(IN2, LOW);
+}
+
+BLYNK_WRITE(V0)
+{
+  int x = param[0].asInt();
+
+  if (x < 100)
+    baseLeft();
+  else if (x > 155)
+    baseRight();
+  else
+    baseStop();
+}
+
+BLYNK_WRITE(V1)
+{
+  int pos = param.asInt();
+  servo1.write(pos);
+}
+
+BLYNK_WRITE(V2)
+{
+  int pos = param.asInt();
+  servo2.write(pos);
+}
+
+BLYNK_WRITE(V3)
+{
+  int pos = param.asInt();
+  servo3.write(pos);
+}
+
+void setup()
+{
+  Serial.begin(115200);
+
+  pinMode(IN1, OUTPUT);
+  pinMode(IN2, OUTPUT);
+  pinMode(ENA, OUTPUT);
+  analogWrite(ENA, 200);
+
+  servo1.attach(SERVO1_PIN);
+  servo2.attach(SERVO2_PIN);
+  servo3.attach(SERVO3_PIN);
+
+  servo1.write(90);
+  servo2.write(90);
+  servo3.write(90);
+
+  Blynk.begin(auth, ssid, pass);
+}
+
+void loop()
+{
+  Blynk.run();
+}
